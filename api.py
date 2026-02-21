@@ -1,11 +1,14 @@
 """FastAPI backend for WatchNext — mood-based movie recommendations."""
 
 import time
+import logging
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from pydantic import BaseModel
+
+logger = logging.getLogger(__name__)
 
 from core.mood_parser import parse_mood
 from core.tmdb_client import discover_movies, enrich_movies
@@ -41,17 +44,22 @@ def health():
 def recommend(req: RecommendRequest):
     t0 = time.time()
 
-    # Step 1: GPT-4o-mini translates mood → TMDB filters
-    filters = parse_mood(req.mood)
+    try:
+        # Step 1: GPT-4o-mini translates mood → TMDB filters
+        filters = parse_mood(req.mood)
 
-    # Step 2: TMDB Discover API returns 20 candidates
-    raw_movies = discover_movies(filters, limit=20)
+        # Step 2: TMDB Discover API returns 20 candidates
+        raw_movies = discover_movies(filters, limit=20)
 
-    # Step 3: Enrich with full details + streaming providers
-    candidates = enrich_movies(raw_movies, include_providers=True)
+        # Step 3: Enrich with full details + streaming providers
+        candidates = enrich_movies(raw_movies, include_providers=True)
 
-    # Step 4: GPT-4o-mini ranks 20 → top 5 with explanations
-    movies = rank_movies(req.mood, candidates)
+        # Step 4: GPT-4o-mini ranks 20 → top 5 with explanations
+        movies = rank_movies(req.mood, candidates)
+
+    except Exception as e:
+        logger.error(f"Recommendation failed: {type(e).__name__}: {e}")
+        raise HTTPException(status_code=502, detail=f"Recommendation engine error: {type(e).__name__}")
 
     latency = time.time() - t0
 
