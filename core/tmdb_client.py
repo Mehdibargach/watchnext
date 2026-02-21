@@ -53,7 +53,12 @@ def discover_movies(filters: dict, limit: int = 5) -> list[dict]:
         "sort_by": "sort_by",
         "release_date_gte": "primary_release_date.gte",
         "release_date_lte": "primary_release_date.lte",
+        "with_watch_providers": "with_watch_providers",
     }
+
+    # If filtering by provider, must specify watch region
+    if "with_watch_providers" in filters and filters["with_watch_providers"]:
+        params["watch_region"] = "US"
 
     for our_key, tmdb_key in param_mapping.items():
         if our_key in filters and filters[our_key] is not None:
@@ -80,18 +85,42 @@ def get_movie_details(movie_id: int) -> dict:
     return resp.json()
 
 
-def enrich_movies(discover_results: list[dict]) -> list[dict]:
-    """Enrich Discover results with full details (runtime, etc.).
+def get_watch_providers(movie_id: int, region: str = "US") -> list[dict]:
+    """Fetch streaming providers for a movie in a given region.
 
-    For each movie, fetches /movie/{id} to get runtime and full metadata.
-    Returns a clean list of movie dicts ready for the API response.
+    Returns list of dicts: [{"name": "Netflix", "logo_url": "..."}]
+    Only returns 'flatrate' (subscription) providers, not rent/buy.
+    """
+    resp = httpx.get(
+        f"{_BASE}/movie/{movie_id}/watch/providers",
+        headers=_headers(),
+    )
+    resp.raise_for_status()
+    results = resp.json().get("results", {})
+    country_data = results.get(region, {})
+    flatrate = country_data.get("flatrate", [])
+
+    return [
+        {
+            "name": provider["provider_name"],
+            "logo_url": f"{_IMG_BASE}/w92{provider['logo_path']}" if provider.get("logo_path") else None,
+        }
+        for provider in flatrate
+    ]
+
+
+def enrich_movies(discover_results: list[dict], include_providers: bool = False) -> list[dict]:
+    """Enrich Discover results with full details (runtime, providers, etc.).
+
+    For each movie, fetches /movie/{id} for runtime and optionally
+    /movie/{id}/watch/providers for streaming platforms.
     """
     enriched = []
     for movie in discover_results:
         details = get_movie_details(movie["id"])
         genre_names = [GENRE_ID_TO_NAME.get(gid, "Unknown") for gid in movie.get("genre_ids", [])]
 
-        enriched.append({
+        entry = {
             "id": movie["id"],
             "title": details.get("title", movie.get("title", "")),
             "genres": genre_names,
@@ -100,13 +129,11 @@ def enrich_movies(discover_results: list[dict]) -> list[dict]:
             "release_year": (details.get("release_date") or "")[:4],
             "overview": details.get("overview", ""),
             "poster_url": f"{_IMG_BASE}/w500{details['poster_path']}" if details.get("poster_path") else None,
-        })
+        }
+
+        if include_providers:
+            entry["providers"] = get_watch_providers(movie["id"])
+
+        enriched.append(entry)
 
     return enriched
-
-
-def poster_url(poster_path: str, size: str = "w500") -> str:
-    """Construct a full poster URL from a TMDB poster_path."""
-    if not poster_path:
-        return ""
-    return f"{_IMG_BASE}/{size}{poster_path}"

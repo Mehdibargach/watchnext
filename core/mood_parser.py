@@ -18,12 +18,22 @@ GENRE_MAP = {
     "Thriller": 53, "War": 10752, "Western": 37,
 }
 
+PROVIDER_MAP = {
+    "Netflix": 8, "Amazon Prime Video": 9, "Disney+": 337,
+    "Hulu": 15, "Max": 1899, "Apple TV+": 350,
+    "Paramount+": 531, "Peacock": 386,
+}
+
 GENRE_IDS_STR = ", ".join(f"{name}: {gid}" for name, gid in GENRE_MAP.items())
+PROVIDER_IDS_STR = ", ".join(f"{name}: {pid}" for name, pid in PROVIDER_MAP.items())
 
 SYSTEM_PROMPT = f"""You are a movie recommendation filter generator. Given a user's mood description, extract structured filters for the TMDB Discover API.
 
 Available genre IDs:
 {GENRE_IDS_STR}
+
+Available streaming platform IDs:
+{PROVIDER_IDS_STR}
 
 Rules:
 1. Map the user's mood to the most relevant genre(s). Return genre IDs as a pipe-separated string for OR (e.g. "35|10749" for Comedy OR Romance).
@@ -33,7 +43,8 @@ Rules:
 5. If the user mentions a time period ("recent" → last 3 years, "90s" → 1990-1999), set release_date_gte/lte.
 6. Default vote_average_gte to 6.0 to filter out poorly-rated movies.
 7. For runtime: "short" = under 100 min, "long" = over 150 min. Only set if user mentions duration.
-8. Never hallucinate genre IDs. Only use the IDs listed above."""
+8. Never hallucinate genre IDs or provider IDs. Only use the IDs listed above.
+9. If the user mentions a streaming platform ("on Netflix", "available on Disney+"), set with_watch_providers to the matching provider ID. Only set if explicitly mentioned."""
 
 FILTER_FUNCTION = {
     "name": "set_movie_filters",
@@ -72,6 +83,11 @@ FILTER_FUNCTION = {
             "release_date_lte": {
                 "type": "string",
                 "description": "Maximum release date (YYYY-MM-DD). Only set if user mentions time period.",
+                "nullable": True,
+            },
+            "with_watch_providers": {
+                "type": "string",
+                "description": "Pipe-separated streaming provider IDs (e.g. '8' for Netflix). Only set if user mentions a specific platform.",
                 "nullable": True,
             },
         },

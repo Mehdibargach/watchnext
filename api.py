@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from core.mood_parser import parse_mood
 from core.tmdb_client import discover_movies, enrich_movies
+from core.recommender import rank_movies
 
 load_dotenv()
 
@@ -43,11 +44,14 @@ def recommend(req: RecommendRequest):
     # Step 1: GPT-4o-mini translates mood → TMDB filters
     filters = parse_mood(req.mood)
 
-    # Step 2: TMDB Discover API returns movies matching filters
-    raw_movies = discover_movies(filters, limit=5)
+    # Step 2: TMDB Discover API returns 20 candidates
+    raw_movies = discover_movies(filters, limit=20)
 
-    # Step 3: Enrich with full details (runtime, poster, etc.)
-    movies = enrich_movies(raw_movies)
+    # Step 3: Enrich with full details + streaming providers
+    candidates = enrich_movies(raw_movies, include_providers=True)
+
+    # Step 4: GPT-4o-mini ranks 20 → top 5 with explanations
+    movies = rank_movies(req.mood, candidates)
 
     latency = time.time() - t0
 

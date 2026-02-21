@@ -13,7 +13,7 @@ Movie recommendation engine powered by mood. Tell it what you feel like watching
 - **Top K**: Fetch 20 from TMDB, LLM ranks top 5 with explanations
 
 ## Current Phase
-BUILD — Walking Skeleton DONE (5/5 micro-tests PASS). Skeleton Check passed. Next: Scope 1.
+BUILD — Walking Skeleton DONE (5/5 PASS). Scope 1 DONE (6/6 PASS, PM valide). Next: Scope 2 (deploy Render + frontend Lovable).
 
 ## Riskiest Assumption
 "An LLM can translate a vague mood description into TMDB Discover API filters that return movies the user actually wants to watch."
@@ -25,7 +25,8 @@ BUILD — Walking Skeleton DONE (5/5 micro-tests PASS). Skeleton Check passed. N
 ## Build Rules (from DocuQuery — applies to all projects)
 1. Micro-test = gate, pas une etape. Code → Micro-test PASS → Doc → Commit.
 2. Le gameplan fait autorite sur les donnees de test.
-3. Checklist qualite walkthrough.
+3. Checklist qualite walkthrough — audience non-technique (analogies AVANT concepts, zero jargon sans explication, ton conversationnel, FR + EN).
 4. Pas de mode batch.
 5. Test first, code if needed.
 6. UX dans les prompts — no jargon leaked to user.
+7. PM Validation Gate — apres micro-tests PASS, AVANT commit : donner les instructions de test au PM, attendre son GO explicite. Zero commit sans feu vert PM.
