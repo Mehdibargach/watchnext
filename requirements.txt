@@ -1,0 +1,13 @@
+# API Framework
+fastapi
+uvicorn[standard]
+
+# LLM
+openai
+
+# HTTP client (TMDB API)
+httpx
+
+# Utilities
+python-dotenv
+pydantic
