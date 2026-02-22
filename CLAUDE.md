@@ -13,7 +13,11 @@ Movie recommendation engine powered by mood. Tell it what you feel like watching
 - **Top K**: Fetch 20 from TMDB, LLM ranks top 5 with explanations
 
 ## Current Phase
-BUILD — Walking Skeleton DONE (5/5 PASS). Scope 1 DONE (6/6 PASS, PM valide). Next: Scope 2 (deploy Render + frontend Lovable).
+BUILD COMPLETE — All scopes done (WS 5/5, S1 6/6, S2 8/8). Next: EVALUATE.
+
+## Live URLs
+- **Backend**: https://watchnext-flta.onrender.com
+- **GitHub**: https://github.com/Mehdibargach/watchnext
 
 ## Riskiest Assumption
 "An LLM can translate a vague mood description into TMDB Discover API filters that return movies the user actually wants to watch."

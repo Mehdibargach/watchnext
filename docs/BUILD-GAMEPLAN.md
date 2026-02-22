@@ -56,8 +56,8 @@
 | Slice | R1 | R2 | R3 | R4 | R5 | D1 | D2 | D3 | D4 | D5 | Status |
 |-------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|--------|
 | Walking Skeleton | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | **DONE** |
-| Scope 1 | — | — | — | — | — | — | — | — | — | — | NOT STARTED |
-| Scope 2 | — | — | — | — | — | — | — | — | — | — | NOT STARTED |
+| Scope 1 | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | **DONE** |
+| Scope 2 | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | **DONE** |
 
 ---
 
@@ -140,7 +140,18 @@
 
 **Gate:** 6/6 PASS
 
-**Result:** — (not started)
+**Result:**
+
+| # | Type | Mood Input | Result | Verdict |
+|---|------|-----------|--------|---------|
+| S1-1 | Platform filter | "Comedy on Netflix" | 5/5 available on Netflix | **PASS** |
+| S1-2 | Platform filter | "Action on Disney+" | 5/5 available on Disney+ | **PASS** |
+| S1-3 | Explanation | "Light and funny for a tired couple" | All "why" reference mood context | **PASS** |
+| S1-4 | Ranking quality | "Best thriller of the last 5 years" | Top-ranked higher rated than #5 | **PASS** |
+| S1-5 | Poster URLs | "epic action" | 5/5 poster URLs resolve (HTTP 200) | **PASS** |
+| S1-6 | Full metadata | "epic action" | All 6 fields present for all 5 recs | **PASS** |
+
+**Gate: 6/6 PASS** — Full pipeline with providers, ranking, explanations, posters all working.
 
 ---
 
@@ -165,7 +176,20 @@
 
 **Gate:** 8/8 PASS
 
-**Result:** — (not started)
+**Result:**
+
+| # | Type | Test | Result | Verdict |
+|---|------|------|--------|---------|
+| S2-1 | Deploy | curl /health | `{"status": "ok"}` — 200 in 0.3s | **PASS** |
+| S2-2 | E2E | Lovable → Render → TMDB → response | 5 films affiches, cross-origin OK | **PASS** |
+| S2-3 | Posters | Mood query | 5/5 posters chargent correctement | **PASS** |
+| S2-4 | Streaming | "comedy on Netflix" | Logos streaming visibles dans detail view | **PASS** |
+| S2-5 | Loading | Submit query | Lottie popcorn + progress bar indigo + movie facts | **PASS** |
+| S2-6 | Empty state | Ouvrir l'app | Headline + chips + input + poster wall atmospherique | **PASS** |
+| S2-7 | Mobile | Ouvrir sur telephone | Grid 2 colonnes, bottom sheet au clic, input accessible | **PASS** |
+| S2-8 | Usability | Non-tech users | Flow complet sans aide | **PASS** |
+
+**Gate: 8/8 PASS** — Produit demo-ready. Backend Render + Frontend Lovable fonctionnels end-to-end.
 
 ---
 
