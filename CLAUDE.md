@@ -13,7 +13,7 @@ Movie recommendation engine powered by mood. Tell it what you feel like watching
 - **Top K**: Fetch 20 from TMDB, LLM ranks top 5 with explanations
 
 ## Current Phase
-BUILD COMPLETE — All scopes done (WS 5/5, S1 6/6, S2 8/8). Next: EVALUATE.
+SHIP — Build complete (WS 5/5, S1 6/6, S2 8/8). Eval: NO-GO → micro-loop (5 fixes) → CONDITIONAL GO. Deployed and demo-ready.
 
 ## Live URLs
 - **Backend**: https://watchnext-flta.onrender.com

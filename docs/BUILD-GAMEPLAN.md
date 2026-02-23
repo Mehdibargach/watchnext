@@ -214,20 +214,28 @@ watchnext/
 └── .env
 ```
 
-| Module | Responsibility | Walking Skeleton | Scope 1 | Scope 2 |
-|--------|---------------|:----------------:|:-------:|:-------:|
-| `mood_parser.py` | Mood → TMDB filters | ✓ | Enhanced (providers) | — |
-| `tmdb_client.py` | TMDB API calls | Discover only | + Watch Providers + Images | — |
-| `recommender.py` | Rank + explain | — (not in WS) | ✓ | — |
-| `api.py` | FastAPI endpoints | /health + /recommend (basic) | /recommend (full) | CORS for Lovable |
-| Lovable frontend | UI | — | — | ✓ |
+| Module | Responsibility | Walking Skeleton | Scope 1 | Scope 2 | Micro-loop |
+|--------|---------------|:----------------:|:-------:|:-------:|:----------:|
+| `mood_parser.py` | Mood → TMDB filters | ✓ | Enhanced (providers) | — | + language + cast_names + null cleanup |
+| `tmdb_client.py` | TMDB API calls | Discover only | + Watch Providers + Images | — | + search_person() + with_original_language |
+| `recommender.py` | Rank + explain | — (not in WS) | ✓ | — | + dedup + genre precision + diversity rules |
+| `api.py` | FastAPI endpoints | /health + /recommend (basic) | /recommend (full) | CORS + error handling | — |
+| Lovable frontend | UI | — | — | ✓ | — |
 
 ---
 
 ## Exit Criteria (BUILD → EVALUATE)
 
-- [ ] All MVP features from 1-Pager functional end-to-end
-- [ ] Riskiest Assumption tested (Skeleton Check passed)
-- [ ] Open Questions from 1-Pager resolved or converted to ADRs
-- [ ] Build Log up to date
-- [ ] Ready for formal evaluation (10 mood queries × 3 eval levels)
+- [x] All MVP features from 1-Pager functional end-to-end
+- [x] Riskiest Assumption tested (Skeleton Check passed)
+- [x] Open Questions from 1-Pager resolved or converted to ADRs
+- [x] Build Log up to date
+- [x] Ready for formal evaluation (10 mood queries × 3 eval levels)
+
+## EVALUATE Result
+
+- **Round 1:** NO-GO (G1 9/10, G2 44/50) — 5 bugs identified
+- **Micro-loop:** 5 fixes applied (language, cast, dedup, genre, null cleanup)
+- **Round 2:** CONDITIONAL GO (G1 10/10, G2 49/50, G3 2.78 avg)
+- **Conditions:** Animation bias (SIGNAL, V2), language ≠ country (TMDB limitation)
+- **Full report:** `docs/EVAL-REPORT.md`
