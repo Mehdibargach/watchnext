@@ -27,6 +27,13 @@ PROVIDER_MAP = {
 GENRE_IDS_STR = ", ".join(f"{name}: {gid}" for name, gid in GENRE_MAP.items())
 PROVIDER_IDS_STR = ", ".join(f"{name}: {pid}" for name, pid in PROVIDER_MAP.items())
 
+LANGUAGE_CODES = (
+    "en: English, fr: French, ko: Korean, ja: Japanese, es: Spanish, "
+    "de: German, it: Italian, hi: Hindi, zh: Chinese, pt: Portuguese, "
+    "ru: Russian, ar: Arabic, th: Thai, sv: Swedish, da: Danish, "
+    "nl: Dutch, pl: Polish, tr: Turkish, ta: Tamil, te: Telugu"
+)
+
 SYSTEM_PROMPT = f"""You are a movie recommendation filter generator. Given a user's mood description, extract structured filters for the TMDB Discover API.
 
 Available genre IDs:
@@ -34,6 +41,9 @@ Available genre IDs:
 
 Available streaming platform IDs:
 {PROVIDER_IDS_STR}
+
+Common language codes (ISO 639-1):
+{LANGUAGE_CODES}
 
 Rules:
 1. Map the user's mood to the most relevant genre(s). Return genre IDs as a pipe-separated string for OR (e.g. "35|10749" for Comedy OR Romance).
@@ -44,7 +54,9 @@ Rules:
 6. Default vote_average_gte to 6.0 to filter out poorly-rated movies.
 7. For runtime: "short" = under 100 min, "long" = over 150 min. Only set if user mentions duration.
 8. Never hallucinate genre IDs or provider IDs. Only use the IDs listed above.
-9. If the user mentions a streaming platform ("on Netflix", "available on Disney+"), set with_watch_providers to the matching provider ID. Only set if explicitly mentioned."""
+9. If the user mentions a streaming platform ("on Netflix", "available on Disney+"), set with_watch_providers to the matching provider ID. Only set if explicitly mentioned.
+10. If the user mentions a specific language or country of origin ("Korean movie", "French film", "Japanese anime", "Bollywood", "un film francais"), set with_original_language to the ISO 639-1 code. ALWAYS set this when language or country is mentioned — this is critical for filtering.
+11. If the user mentions specific actors or actresses ("with Brad Pitt", "a Tom Hanks movie", "un film avec Omar Sy"), set with_cast_names to their full names, comma-separated. Only set if actors are explicitly mentioned."""
 
 FILTER_FUNCTION = {
     "name": "set_movie_filters",
@@ -90,6 +102,16 @@ FILTER_FUNCTION = {
                 "description": "Pipe-separated streaming provider IDs (e.g. '8' for Netflix). Only set if user mentions a specific platform.",
                 "nullable": True,
             },
+            "with_original_language": {
+                "type": "string",
+                "description": "ISO 639-1 language code for the movie's original language (e.g. 'ko' for Korean, 'fr' for French, 'ja' for Japanese). Only set if user mentions a specific language or country of origin.",
+                "nullable": True,
+            },
+            "with_cast_names": {
+                "type": "string",
+                "description": "Comma-separated actor/actress names mentioned by the user (e.g. 'Brad Pitt' or 'Brad Pitt, Angelina Jolie'). Only set if user explicitly mentions specific actors.",
+                "nullable": True,
+            },
         },
         "required": ["with_genres", "vote_average_gte", "sort_by"],
     },
@@ -129,5 +151,5 @@ def parse_mood(mood: str) -> dict:
     fn_call = response.choices[0].message.function_call
     filters = json.loads(fn_call.arguments)
 
-    # Clean up null values
-    return {k: v for k, v in filters.items() if v is not None}
+    # Clean up null/empty values (including string "null" from GPT)
+    return {k: v for k, v in filters.items() if v is not None and v != "null" and v != ""}

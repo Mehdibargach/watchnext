@@ -27,6 +27,20 @@ def _headers() -> dict:
     }
 
 
+def search_person(name: str) -> int | None:
+    """Search TMDB for a person by name, return their ID or None."""
+    resp = httpx.get(
+        f"{_BASE}/search/person",
+        params={"query": name, "language": "en-US"},
+        headers=_headers(),
+    )
+    resp.raise_for_status()
+    results = resp.json().get("results", [])
+    if results:
+        return results[0]["id"]
+    return None
+
+
 def discover_movies(filters: dict, limit: int = 5) -> list[dict]:
     """Call TMDB Discover endpoint with parsed filters.
 
@@ -54,11 +68,23 @@ def discover_movies(filters: dict, limit: int = 5) -> list[dict]:
         "release_date_gte": "primary_release_date.gte",
         "release_date_lte": "primary_release_date.lte",
         "with_watch_providers": "with_watch_providers",
+        "with_original_language": "with_original_language",
     }
 
     # If filtering by provider, must specify watch region
     if "with_watch_providers" in filters and filters["with_watch_providers"]:
         params["watch_region"] = "US"
+
+    # Resolve cast names to TMDB person IDs
+    if "with_cast_names" in filters and filters["with_cast_names"]:
+        cast_names = [n.strip() for n in filters["with_cast_names"].split(",")]
+        cast_ids = []
+        for name in cast_names:
+            pid = search_person(name)
+            if pid:
+                cast_ids.append(str(pid))
+        if cast_ids:
+            params["with_cast"] = "|".join(cast_ids)
 
     for our_key, tmdb_key in param_mapping.items():
         if our_key in filters and filters[our_key] is not None:

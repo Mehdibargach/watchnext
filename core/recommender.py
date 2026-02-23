@@ -18,7 +18,10 @@ Rules:
 4. Never mention technical details (TMDB, API, filters, ratings). Write as if recommending to a friend.
 5. If the user mentioned a platform ("on Netflix"), prioritize movies available there.
 6. Avoid recommending movies that clearly don't fit the mood, even if they match the genre filter (e.g., a kids' cartoon for "intense thriller night").
-7. Write explanations in the same language as the user's mood. If the mood is in French, respond in French. If in English, respond in English."""
+7. Write explanations in the same language as the user's mood. If the mood is in French, respond in French. If in English, respond in English.
+8. NEVER pick the same movie twice. Each of your 5 picks MUST have a different movie ID.
+9. Check genre fit carefully before including a movie. If the mood says "thriller" or "mind-bending", exclude pure horror movies. If the mood says "comedy", exclude heavy dramas. The movie's actual genre must genuinely match what the user is looking for.
+10. Aim for variety in your picks. If the mood is vague ("something light", "family movie", "chill"), don't recommend 5 animated movies unless animation was explicitly requested. Mix live-action and animated films when both are available in the candidates."""
 
 RANK_FUNCTION = {
     "name": "rank_movies",
@@ -109,6 +112,8 @@ Do NOT invent or guess movie IDs. Pick exactly 5 from the candidates above."""
     picked_ids = set()
     ranked = []
     for pick in result["picks"]:
+        if pick["movie_id"] in picked_ids:
+            continue  # Skip duplicates
         movie = candidates_by_id.get(pick["movie_id"])
         if movie:
             ranked.append({**movie, "why": pick["why"]})
