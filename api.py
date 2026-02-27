@@ -10,7 +10,7 @@ from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
-from core.mood_parser import parse_mood
+from core.mood_parser import parse_mood, _parse_mood_cached
 from core.tmdb_client import discover_movies, enrich_movies
 from core.recommender import rank_movies
 
@@ -37,7 +37,17 @@ class RecommendRequest(BaseModel):
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "version": "0.1.0"}
+    cache_info = _parse_mood_cached.cache_info()
+    return {
+        "status": "ok",
+        "version": "0.2.0",
+        "cache": {
+            "hits": cache_info.hits,
+            "misses": cache_info.misses,
+            "size": cache_info.currsize,
+            "maxsize": cache_info.maxsize,
+        },
+    }
 
 
 @app.post("/recommend")

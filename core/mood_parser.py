@@ -6,7 +6,11 @@ Uses OpenAI function calling for reliable structured output.
 """
 
 import json
+import logging
+from functools import lru_cache
 from openai import OpenAI
+
+logger = logging.getLogger(__name__)
 
 _client = None
 
@@ -128,15 +132,15 @@ def _get_client() -> OpenAI:
 def parse_mood(mood: str) -> dict:
     """Translate a mood description into TMDB Discover API filters.
 
-    Returns a dict like:
-        {
-            "with_genres": "35",
-            "vote_average_gte": 6.0,
-            "sort_by": "popularity.desc",
-            "with_runtime_lte": 120,
-            ...
-        }
+    Normalizes input and delegates to cached implementation.
     """
+    normalized = mood.strip().lower()
+    return _parse_mood_cached(normalized)
+
+
+@lru_cache(maxsize=512)
+def _parse_mood_cached(mood: str) -> dict:
+    """Cached mood parsing — same mood string = same OpenAI call saved."""
     client = _get_client()
     response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -150,6 +154,8 @@ def parse_mood(mood: str) -> dict:
 
     fn_call = response.choices[0].message.function_call
     filters = json.loads(fn_call.arguments)
+
+    logger.info(f"Mood parsed (cache MISS): '{mood[:50]}' → {filters}")
 
     # Clean up null/empty values (including string "null" from GPT)
     return {k: v for k, v in filters.items() if v is not None and v != "null" and v != ""}
