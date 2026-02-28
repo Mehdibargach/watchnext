@@ -8,6 +8,11 @@ openai
 # HTTP client (TMDB API)
 httpx
 
+# V2 ML models
+scikit-learn
+scipy
+numpy
+
 # Utilities
 python-dotenv
 pydantic
