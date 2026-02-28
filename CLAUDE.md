@@ -13,7 +13,17 @@ Movie recommendation engine powered by mood. Tell it what you feel like watching
 - **Top K**: Fetch 20 from TMDB, LLM ranks top 5 with explanations
 
 ## Current Phase
-SHIP — Build complete (WS 5/5, S1 6/6, S2 8/8). Eval: NO-GO → micro-loop (5 fixes) → CONDITIONAL GO. Deployed and demo-ready.
+**V1:** SHIP — Build complete, CONDITIONAL GO, deployed and demo-ready.
+**V2 (ML):** BUILD — Walking Skeleton DONE (7/7 PASS, PM GO). Scope 1 next.
+
+## V2 — ML Recommendations (cohabitation avec V1)
+- **1-Pager :** `docs/v2/BUILDER-PM-1-PAGER.md`
+- **Gameplan :** `docs/v2/BUILD-GAMEPLAN.md`
+- **Build Log :** `docs/v2/BUILD-LOG.md`
+- **Concept :** V1 (LLM mood → top 5) reste intact. V2 ajoute "Similar Movies" (similarité) + "Viewers Also Liked" (communautaire) sur la page détail d'un film.
+- **Données :** MovieLens 25M (62K films, 25M notes) dans `data/movielens/ml-25m/`
+- **Modèles :** similarité = TF-IDF sur synopsis TMDB, communautaire = SVD scipy sur ratings MovieLens
+- **WS learnings :** filtre min 50 notes/film (anti-bruit), Bearer token TMDB (pas api_key), venv Python 3.11
 
 ## Live URLs
 - **Backend**: https://watchnext-flta.onrender.com
