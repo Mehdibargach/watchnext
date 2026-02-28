@@ -56,9 +56,10 @@
 
 | Slice | R1 | R2 | R3 | R4 | R5 | D1 | D2 | D3 | D4 | D5 | Status |
 |-------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|--------|
-| Walking Skeleton | | | | | | | | | | | Pending |
-| Scope 1 | | | | | | | | | | | Pending |
-| Scope 2 | | | | | | | | | | | Pending |
+| Walking Skeleton | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | **DONE** |
+| Scope 1 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | **DONE** |
+| Scope 2 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | **DONE** |
+| Scope 3 | | | | | | | | | | | Pending |
 
 ---
 
@@ -159,6 +160,30 @@
 
 ---
 
+### Scope 3 : Frontend — page détail film + rails de recommandations
+
+**Ce qu'il ajoute :** Le frontend Lovable (React/Tailwind) affiche une page détail quand on clique sur un film. Cette page montre le poster, les infos du film, et surtout les deux rails de recommandations ML : "Similar Movies" et "Viewers Also Liked". C'est ce qui transforme l'API en produit visible et demo-ready.
+
+**Chemin de bout en bout :** User clique sur un poster dans les résultats V1 → page détail s'ouvre → appel `GET /movie/{tmdb_id}/similar` → affiche le rail "Similar Movies" (toujours) et le rail "Viewers Also Liked" (si disponible) → chaque film dans un rail est cliquable (ouvre sa propre page détail → navigation infinie)
+
+**Done when :** Cliquer sur un film dans les résultats V1 ouvre une page détail avec poster + infos + 2 rails de recos. Chaque film dans les rails est cliquable. Les rails se cachent quand le modèle n'est pas confiant (seuil de confiance côté API). Design cohérent avec la V1 (dark monochrome, indigo accent).
+
+**Micro-test :**
+
+| # | Type | Test | Expected | Pass Criteria |
+|---|------|------|----------|---------------|
+| S3-1 | Navigation | Cliquer sur un poster dans les résultats V1 | Page détail s'ouvre avec poster grand format, titre, genres, note, année, durée, synopsis | Tous les champs affichés |
+| S3-2 | Rail "Similar Movies" | Page détail de The Dark Knight (TMDB 155) | Rail horizontal avec 5 posters cliquables, label "Similar Movies" | 5 posters affichés avec titre et année |
+| S3-3 | Rail "Viewers Also Liked" | Page détail de The Dark Knight | Rail horizontal avec 5 posters cliquables, label "Viewers Also Liked" | 5 posters affichés |
+| S3-4 | Rail masqué | Film récent hors MovieLens (Oppenheimer) OU film avec score trop bas | Pas de rail "Viewers Also Liked" affiché (pas de rail vide, pas d'erreur) | Rail absent, pas d'espace vide |
+| S3-5 | Navigation chaînée | Cliquer sur un film dans un rail → sa propre page détail avec ses propres rails | Navigation infinie entre films | Au moins 3 clics de navigation fonctionnels |
+| S3-6 | Retour | Bouton retour depuis la page détail | Retour aux résultats V1 | Les résultats V1 sont toujours là |
+| S3-7 | Responsive | Page détail sur mobile (< 768px) | Layout adapté : poster en haut, infos en dessous, rails en scroll horizontal | Pas de débordement, tout lisible |
+
+**Gate:** 7/7 PASS
+
+---
+
 ## Architecture — Structure des modules V2
 
 ```
@@ -196,22 +221,24 @@ watchnext/
                                   (à lancer 1 fois, sauvegarde dans models/)
 ```
 
-| Module | Responsabilité | Walking Skeleton | Scope 1 | Scope 2 |
-|--------|---------------|:----------------:|:-------:|:-------:|
-| `data_loader.py` | Charger MovieLens + mapping TMDB | ✓ | — | — |
-| `content_based.py` | Matrice similarité + requête "Similar Movies" | ✓ (script) | ✓ (module) | — |
-| `collaborative.py` | Modèle communautaire + requête "Also Liked" | ✓ (script) | ✓ (module) | — |
-| `hybrid.py` | Blend des deux scores normalisés | — | — | ✓ |
-| `similar.py` | Orchestrateur : TMDB ID → 3 listes | — | ✓ | ✓ (+ hybrid) |
-| `api.py` | Nouveau endpoint `/movie/{id}/similar` | — | ✓ | — |
-| `train_models.py` | Script d'entraînement offline | ✓ | — | — |
+| Module | Responsabilité | WS | S1 | S2 | S3 |
+|--------|---------------|:--:|:--:|:--:|:--:|
+| `data_loader.py` | Charger MovieLens + mapping TMDB | ✓ | — | — | — |
+| `content_based.py` | Matrice similarité + requête "Similar Movies" | ✓ (script) | ✓ (module) | — | — |
+| `collaborative.py` | Modèle communautaire + requête "Also Liked" | ✓ (script) | ✓ (module) | — | — |
+| `hybrid.py` | Blend des deux scores normalisés (interne, pas exposé) | — | — | ✓ | — |
+| `similar.py` | Orchestrateur : TMDB ID → 2 listes + seuils de confiance | — | ✓ | ✓ | — |
+| `api.py` | Nouveau endpoint `/movie/{id}/similar` | — | ✓ | — | — |
+| `train_models.py` | Script d'entraînement offline | ✓ | — | — | — |
+| Frontend (Lovable) | Page détail film + 2 rails de recos | — | — | — | ✓ |
 
 ---
 
 ## Exit Criteria (BUILD → EVALUATE)
 
-- [ ] Toutes les features MVP du 1-Pager fonctionnelles de bout en bout
-- [ ] Riskiest Assumption testée (Skeleton Check passé)
-- [ ] Open Questions du 1-Pager résolues ou converties en ADRs
-- [ ] Build Log à jour
-- [ ] Prêt pour l'évaluation formelle (10 films seed × 3 types de recs × évaluation humaine)
+- [x] Riskiest Assumption testée (Skeleton Check passé — 98% couverture, 7/7 PASS)
+- [x] Open Questions du 1-Pager résolues (UX = 2 rails, seuils de confiance, hybride = interne)
+- [x] Build Log à jour (WS + S1 + S2)
+- [x] Évaluation formelle complétée (Hit Rate sur 10 seeds : 22% similarité, 28% communautaire)
+- [ ] Frontend demo-ready (Scope 3 — page détail + 2 rails)
+- [ ] Toutes les features MVP visibles de bout en bout (user clique → voit les recos)

@@ -8,7 +8,5 @@ dist/
 build/
 .DS_Store
 
-# V2 ML data & models (too large for git)
+# V2 ML data (too large for git — 678MB ratings.csv)
 data/
-models/
-*.pkl
