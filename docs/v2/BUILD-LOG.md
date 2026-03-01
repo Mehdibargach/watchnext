@@ -124,3 +124,39 @@
 - PM a relevé que les walkthroughs n'avaient pas été écrits (DOD D3 manquant pour les 3 slices). Root cause : la Checklist C (DOR) ne vérifiait pas que la DOD précédente était terminée → saut direct au code de la slice suivante.
 - Fix : ajout de C0 (BLOQUANT : DOD de la slice précédente 100% terminée) + règle de fer dans la séquence.
 - PM a relevé l'absence de frontend pour la V2 → Scope 3 ajouté (page détail film + 2 rails Lovable).
+
+## Scope 3 — 2026-03-01
+
+**Objectif :** Frontend — page détail film avec 2 rails de recommandations ML, navigation chaînée infinie, responsive.
+
+**Ce qui a été fait :**
+- Prompt Lovable (Prompt 5) écrit avec spécifications complètes : API endpoint, layout rails, navigation chaînée, responsive, conditional display, skeleton loaders
+- Lovable a implémenté le prompt du premier coup sans itération
+- Page détail film enrichie : poster grand format + infos + 2 rails ML en dessous
+- Navigation infinie : chaque poster dans un rail est cliquable → ouvre sa propre page détail avec ses propres rails
+- Rails conditionnels : si l'API retourne une liste vide (film récent ou score de confiance trop bas), le rail n'est pas affiché
+- Bouton retour fonctionnel (flèche en haut à gauche)
+- Design cohérent avec V1 (dark monochrome, même typographie, mêmes couleurs)
+
+**Résultats :** 7/7 PASS
+- S3-1 : Clic sur un poster → page détail avec poster, titre, genres, note, année, durée, synopsis — tous les champs affichés
+- S3-2 : Rail "Similar Movies" avec 5 posters + titre + année
+- S3-3 : Rail "Viewers Also Liked" avec 5 posters + titre + année
+- S3-4 : Film récent/hors MovieLens → rail "Viewers Also Liked" absent, pas d'espace vide
+- S3-5 : Navigation chaînée fonctionnelle sur 3+ clics (film → rail → nouveau film → rail → nouveau film)
+- S3-6 : Bouton retour ramène aux résultats V1, résultats préservés
+- S3-7 : Responsive mobile — layout adapté, rails en scroll horizontal
+
+**Décisions prises :**
+- Lovable Prompt 5 = un seul prompt complet (pas d'itération nécessaire). Le contexte détaillé (API response shape, conditional rules, navigation specs) a suffi pour un résultat correct du premier coup.
+- Desktop : page détail layout poster gauche + info droite (existant V1), rails en dessous full width
+- Mobile : bottom sheet pour le premier clic depuis les résultats, full page pour la navigation chaînée dans les rails
+
+**Problèmes rencontrés :**
+- Aucun — le prompt a fonctionné du premier coup.
+
+**PM Validation Gate :**
+- PM a vérifié visuellement les screenshots : rails affichés, navigation chaînée, page détail complète
+- **Verdict PM : GO** — "Tout fonctionne très bien"
+
+**Temps :** ~30min (écriture prompt + build Lovable + vérification PM)

@@ -14,7 +14,7 @@ Movie recommendation engine powered by mood. Tell it what you feel like watching
 
 ## Current Phase
 **V1:** SHIP — Build complete, CONDITIONAL GO, deployed and demo-ready.
-**V2 (ML):** BUILD — WS 7/7 PASS, S1 6/6 PASS, S2 8/8 PASS. All PM GO received. UX: 2 rails (Similar + Also Liked), confidence thresholds, no hybrid rail. Scope 3 (frontend Lovable) next.
+**V2 (ML):** BUILD COMPLETE — WS 7/7, S1 6/6, S2 8/8, S3 7/7 PASS. All PM GO received. Frontend live with 2 ML rails (Similar + Also Liked), confidence thresholds, infinite navigation. Ready for EVALUATE phase.
 
 ## V2 — ML Recommendations (cohabitation avec V1)
 - **1-Pager :** `docs/v2/BUILDER-PM-1-PAGER.md`

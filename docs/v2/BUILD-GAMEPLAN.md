@@ -59,7 +59,7 @@
 | Walking Skeleton | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | **DONE** |
 | Scope 1 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | **DONE** |
 | Scope 2 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | **DONE** |
-| Scope 3 | | | | | | | | | | | Pending |
+| Scope 3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | **DONE** |
 
 ---
 
@@ -240,5 +240,5 @@ watchnext/
 - [x] Open Questions du 1-Pager résolues (UX = 2 rails, seuils de confiance, hybride = interne)
 - [x] Build Log à jour (WS + S1 + S2)
 - [x] Évaluation formelle complétée (Hit Rate sur 10 seeds : 22% similarité, 28% communautaire)
-- [ ] Frontend demo-ready (Scope 3 — page détail + 2 rails)
-- [ ] Toutes les features MVP visibles de bout en bout (user clique → voit les recos)
+- [x] Frontend demo-ready (Scope 3 — page détail + 2 rails, 7/7 PASS)
+- [x] Toutes les features MVP visibles de bout en bout (user clique → voit les recos)
